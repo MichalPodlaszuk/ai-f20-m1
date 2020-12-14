@@ -1,85 +1,29 @@
 import requests
 import pandas as pd
 from bs4 import BeautifulSoup
-movie_names = []
-descriptions = []
-release_dates = []
-ratings = []
+import numpy as np
+df = pd.read_csv('Top100IMDB.csv').to_numpy()
+# duration time conversion to minutes
 durations = []
-genres = []
-filming_dates = []
-stars1 = []
-top = requests.get('https://www.imdb.com/list/ls091520106/')
-top1 = BeautifulSoup(top.content, 'html.parser')
-directors = top1.find_all('p', class_="text-muted text-small")
-directors1 = []
-genre = top1.find_all('span', class_="genre")
-for element in genre:
-    genres.append(element.get_text())
-for element in range(1, 300, 3):
-    a = str(directors[element]).split('>')
-    directors1.append(a[2].rstrip('</a'))
-main_page = requests.get('https://www.imdb.com/chart/top/')
-main = BeautifulSoup(main_page.content, 'html.parser')
-titles = main.find_all('a')
-list_titles = list(titles)
-proper_elements = list_titles[60:259:2]
-href = []
-for d in range(len(proper_elements)):
-    c = (str(proper_elements[d])).split()
-    href.append(c[1])
-h = []
-for f in href:
-    g = f.split('"')
-    h.append(g[1])
-k = []
-for i in h:
-    j = str('https://www.imdb.com' + i)
-    k.append(j)
-for l in range(len(k)):
-    title = requests.get(k[l])
-    title_beautiful = BeautifulSoup(title.content, 'html.parser')
-    movie_name = title_beautiful.find('div', class_="originalTitle").get_text()
-    movie_names.append(movie_name)
-    description = title_beautiful.find('div', class_="summary_text").get_text()
-    descriptions.append(description)
-    try:
-        release_date = title_beautiful.find_all('span', class_="attribute")
-        release_date1 = list(release_date)[1]
-        release_dates.append(release_date1)
-    except IndexError:
-        pass
-    rating = title_beautiful.find('span', itemprop="ratingValue").get_text
-    ratings.append(rating)
-    duration = title_beautiful.find('time').get_text()
-    durations.append(duration)
-    star = title_beautiful.find_all('div', class_="credit_summary_item")
-    random_list = []
-    for b in star:
-        if 'Stars' in str(b):
-            random_list.append(str(b))
-    idk = random_list[0].split('>')
-    stars_i_guess = idk[4::2]
-    okay = stars_i_guess[:-3]
-    proper_stars = []
-    for g in okay:
-        proper_stars.append(g.rstrip('</a'))
-    stars1.append(proper_stars)
-for i in h:
-    j = str('https://www.imdb.com' + i + 'locations?ref_=tt_dt_dt')
-    filming = requests.get(j)
-    filmings = BeautifulSoup(filming.content, 'html.parser')
-    filming_date = filmings.find('li', class_="ipl-zebra-list__item").get_text()
-    filming_dates.append(filming_date)
-data = {'Description': descriptions,
-        'Release Date': release_dates,
-        'Director Name': directors1,
-        'Rating': ratings,
-        'Duration': durations,
-        'Genre': genres,
-        'Stars': stars1,
-        'Filming Dates': filming_dates}
-labels = movie_names
-df = pd.DataFrame(data, index= labels)
-print(df)
-
+ratings = []
+def time_conversion():
+    for b in range(5, 900, 9):
+        a = (str(np.take(df, [b])).strip("'[]")).split()
+        try:
+            for i in range(2):
+                a[i] = a[i].strip('hmin')
+            c = int(a[0]) * 60 + int(a[1])
+            durations.append(c)
+        except IndexError:
+            e = int(a[0]) * 60
+            durations.append(e)
+time_conversion()
+def rating():
+    for f in range(4, 900, 9):
+        g = (str(np.take(df, [f]))).strip("'[10]").strip('/')
+        ratings.append(g)
+rating()
+def filming_time():
+    h = str(np.take(df, [8])).strip
+    print(h)
+filming_time()
